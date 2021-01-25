@@ -1,0 +1,9 @@
+---
+- name: reload proxysql_exporter unit
+  systemd:
+    daemon_reload: true
+
+- name: restart proxysql_exporter service
+  systemd:
+    name: "{{ proxysql_exporter_service_name }}"
+    state: restarted

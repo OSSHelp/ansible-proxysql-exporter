@@ -1,0 +1,27 @@
+---
+proxysql_exporter_version: "latest"
+
+proxysql_exporter_binary_url: "https://oss.help/builds/pub/exporters/proxysql-exporter/{{ proxysql_exporter_version }}/proxysql_exporter"
+
+proxysql_exporter_setup: full
+proxysql_exporter_config_file: proxysql_exporter.cfg
+proxysql_exporter_binary_name: proxysql_exporter
+proxysql_exporter_user_name: proxysql_exporter
+proxysql_exporter_service_name: proxysql_exporter
+proxysql_exporter_systemd_unit: "/etc/systemd/system/{{ proxysql_exporter_service_name }}.service"
+
+proxysql_exporter_dirs:
+  binary_dir: /usr/local/bin
+  config_dir: /usr/local/etc/proxysql_exporter
+
+proxysql_exporter_params:
+  listen_address: "0.0.0.0:42004"
+  telemetry_path: "/metrics"
+  data_source_name: "stats:stats@tcp(127.0.0.1:6032)/"
+
+proxysql_exporter_metrics:
+  mysql_status: true
+  stats_memory_metrics: true
+  mysql_connection_list: true
+  mysql_connection_pool: true
+  stats_mysql_processlist: true

@@ -1,0 +1,32 @@
+[Unit]
+Description=proxysql exporter
+
+[Service]
+Type=forking
+User={{ proxysql_exporter_user_name }}
+Group=nogroup
+RuntimeDirectory=proxysql_exporter
+RuntimeDirectoryMode=0755
+EnvironmentFile={{ proxysql_exporter_dirs.config_dir }}/{{ proxysql_exporter_config_file }}
+{% if ansible_distribution_release == 'focal' %}
+PIDFile=/run/proxysql_exporter/pid
+{% else %}
+PIDFile=/var/run/proxysql_exporter/pid
+{% endif %}
+ExecStart=/sbin/start-stop-daemon -Sbmp /var/run/proxysql_exporter/pid -x {{ proxysql_exporter_dirs.binary_dir }}/proxysql_exporter -- \
+    --web.listen-address={{ proxysql_exporter_params.listen_address }} \
+    --web.telemetry-path={{ proxysql_exporter_params.telemetry_path }} \
+    --collect.detailed.stats_mysql_processlist={{ proxysql_exporter_metrics.stats_mysql_processlist }} \
+    --collect.mysql_connection_list={{ proxysql_exporter_metrics.mysql_connection_list }} \
+    --collect.mysql_connection_pool={{ proxysql_exporter_metrics.mysql_connection_pool }} \
+    --collect.mysql_status={{ proxysql_exporter_metrics.mysql_status }} \
+    --collect.stats_memory_metrics={{ proxysql_exporter_metrics.stats_memory_metrics }}
+
+Restart=always
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=proxysql_exporter
+
+[Install]
+WantedBy=multi-user.target

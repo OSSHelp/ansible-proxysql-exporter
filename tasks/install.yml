@@ -1,0 +1,52 @@
+---
+
+- name: create user
+  user:
+    name: "{{ proxysql_exporter_user_name }}"
+    home: "/nonexistent"
+    create_home: no
+    shell: "/bin/false"
+    system: yes
+
+- name: check if binary file exists
+  stat:
+    path: "{{ proxysql_exporter_dirs.binary_dir }}/{{ proxysql_exporter_binary_name }}"
+  register: binary_file
+
+- name: "download binary to {{ proxysql_exporter_dirs.binary_dir }}"
+  get_url:
+    url: "{{ proxysql_exporter_binary_url }}"
+    dest: "{{ proxysql_exporter_dirs.binary_dir }}/{{ proxysql_exporter_binary_name }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: not binary_file.stat.exists
+
+- name: create systemd unit
+  template:
+    src: proxysql_exporter.service.j2
+    dest: "{{ proxysql_exporter_systemd_unit }}"
+  notify:
+    - reload proxysql_exporter unit
+    - restart proxysql_exporter service
+
+- name: ensure that configuration directory exists
+  file:
+    path: "{{ proxysql_exporter_dirs.config_dir }}"
+    state: directory
+
+- name: create main config placeholder if doesn't exist
+  copy:
+    content: ""
+    dest: "{{ proxysql_exporter_dirs.config_dir }}/{{ proxysql_exporter_config_file }}"
+    force: no
+    owner: root
+    group: "{{ proxysql_exporter_user_name }}"
+    mode: 0640
+
+- meta: flush_handlers
+
+- name: enable service
+  systemd:
+    name: "{{ proxysql_exporter_service_name }}"
+    enabled: true

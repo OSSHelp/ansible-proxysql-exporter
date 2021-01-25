@@ -1,0 +1,9 @@
+---
+- name: create main config
+  template:
+    src: proxysql_exporter.cfg.j2
+    dest: "{{ proxysql_exporter_dirs.config_dir }}/{{ proxysql_exporter_config_file }}"
+    owner: root
+    group: "{{ proxysql_exporter_user_name }}"
+    mode: 0640
+  notify: restart proxysql_exporter service
